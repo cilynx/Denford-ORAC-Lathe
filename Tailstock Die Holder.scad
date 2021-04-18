@@ -41,38 +41,24 @@ module hex_pocket(d, h) {
   bolt_circle(d, h, 6);
 }
 
-module body() {
-  // Bottom chamfer
-  cylinder(h=chamfer, d2=body_d, d1=chamfer_d);
-
-  // Bottom body
-  translate([0,0,chamfer])
-  cylinder(h=grip_h, d=body_d);
-
-  // Bottom body chamfer
-  translate([0,0,grip_h+chamfer])
-  cylinder(h=chamfer, d1=body_d, d2=chamfer_d);
-
-  // Center section
-  translate([0,0,2*chamfer+grip_h])
-  cylinder(h=body_c, d=chamfer_d);
-
-  // Body top chamfer
-  translate([0,0,2*chamfer+grip_h+body_c])
-  cylinder(h=chamfer, d2=body_d, d1=chamfer_d);
-
-  // Top body
-  translate([0,0,3*chamfer+grip_h+body_c])
-  cylinder(h=grip_h, d=body_d);
-
-  // Top chamfer
-  translate([0,0,3*chamfer+grip_h+body_c+grip_h])
-  cylinder(h=chamfer, d1=body_d, d2=chamfer_d);
+module stack(vector, i=0) {
+  if(i < len(vector)) {
+    cylinder(h=vector[i][0], d1=vector[i][1], d2=vector[i][2]);
+    translate([0,0,vector[i][0]]) stack(vector, i+1);
+  }
 }
 
 difference() {
-  body();
-  
+  stack([
+    [chamfer, chamfer_d, body_d],   // Bottom chamfer
+    [grip_h, body_d, body_d],       // Bottom body
+    [chamfer, body_d, chamfer_d],   // Bottom body chamfer
+    [body_c, chamfer_d, chamfer_d], // Center section
+    [chamfer, chamfer_d, body_d],   // Body top chamfer
+    [grip_h, body_d, body_d],       // Top body
+    [chamfer, body_d, chamfer_d]    // Top chamfer
+  ]);
+
   // Axle
   cylinder(h=body_h, d=axle_d);
   
